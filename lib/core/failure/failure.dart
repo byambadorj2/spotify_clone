@@ -1,8 +1,7 @@
-class Failure {
+class AppFailure {
   final String message;
-
-  Failure(this.message);
+  AppFailure([this.message = 'Sorry, unexpected error occurred.']);
 
   @override
-  String toString() => message;
+  String toString() => 'AppFailure(message: $message)';
 }

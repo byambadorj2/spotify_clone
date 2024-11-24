@@ -32,10 +32,11 @@ class _SignupPageState extends ConsumerState<SignupPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = ref.watch(authViewmodelProvider)?.isLoading == true;
+    final isLoading = ref
+        .watch(authViewModelProvider.select((val) => val?.isLoading == true));
 
     ref.listen(
-      authViewmodelProvider,
+      authViewModelProvider,
       (_, next) {
         next?.when(
           data: (data) {
@@ -101,12 +102,14 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                       onTap: () async {
                         if (formKey.currentState!.validate()) {
                           await ref
-                              .read(authViewmodelProvider.notifier)
+                              .read(authViewModelProvider.notifier)
                               .signUpUser(
                                 name: nameController.text,
                                 email: emailController.text,
                                 password: passwordController.text,
                               );
+                        } else {
+                          showSnackBar(context, 'Missing fields!');
                         }
                       },
                     ),

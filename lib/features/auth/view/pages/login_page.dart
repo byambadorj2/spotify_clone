@@ -1,11 +1,11 @@
 import 'package:client/core/theme/app_pallete.dart';
 import 'package:client/core/utils.dart';
 import 'package:client/core/widgets/loader.dart';
-import 'package:client/features/auth/repositories/auth_remote_repository.dart';
 import 'package:client/features/auth/view/pages/signup_page.dart';
 import 'package:client/features/auth/view/widgets/auth_gradient_button.dart';
 import 'package:client/features/auth/view/widgets/custom_field.dart';
 import 'package:client/features/auth/viewmodel/auth_viewmodel.dart';
+import 'package:client/features/home/view/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -31,19 +31,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = ref.watch(authViewmodelProvider)?.isLoading == true;
+    final isLoading = ref
+        .watch(authViewModelProvider.select((val) => val?.isLoading == true));
+
     ref.listen(
-      authViewmodelProvider,
+      authViewModelProvider,
       (_, next) {
         next?.when(
           data: (data) {
-            // Todo: Home Page
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (context) => const HomePage(),
-            //   ),
-            // );
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const HomePage(),
+              ),
+              (_) => false,
+            );
           },
           error: (error, st) {
             showSnackBar(
@@ -88,10 +90,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     AuthGradientButton(
                       buttonText: "Sign in",
                       onTap: () async {
-                        await AuthRemoteRepository().login(
-                          email: emailController.text,
-                          password: passwordController.text,
-                        );
+                        if (formKey.currentState!.validate()) {
+                          await ref
+                              .read(authViewModelProvider.notifier)
+                              .loginUser(
+                                email: emailController.text,
+                                password: passwordController.text,
+                              );
+                        } else {
+                          showSnackBar(context, 'Missing fields!');
+                        }
                       },
                     ),
                     const SizedBox(height: 20),
